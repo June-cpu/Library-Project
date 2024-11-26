@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ library.name }}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Welcome to {{ library.name }}</h1>
+
+    <!-- Flash Messages -->
+    <div id="messages">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="message {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- JavaScript for Flash Messages -->
+    <script>
+        // Remove flash messages after 3 seconds
+        setTimeout(() => {
+            const messages = document.getElementById('messages');
+            if (messages) {
+                messages.style.display = 'none';
+            }
+        }, 3000);
+    </script>
+
+    <!-- Books Section -->
+    <h2>Books</h2>
+    <ul>
+        {% for book in library.book_catalog.get_all_books() %}
+        <li class="{{ 'book-available' if book.status else 'book-borrowed' }}">
+            {{ book.title }} by {{ book.author }} - 
+            {{ "Available" if book.status else "Borrowed" }}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Members Section -->
+    <h2>Members</h2>
+    <ul>
+        {% for member in library.members %}
+        <li>
+            {{ member.name }} (ID: {{ member.unique_ID }}) - Borrowed: 
+            {{ member.borrowed_books | join(", ") or "None" }}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Forms Section -->
+    <div class="form-container">
+        <!-- Add Book Form -->
+        <form action="/add_book" method="POST">
+            <h3>Add Book</h3>
+            <input type="text" name="title" placeholder="Book Title" required>
+            <input type="text" name="author" placeholder="Author" required>
+            <button type="submit">Add Book</button>
+        </form>
+
+        <!-- Add Member Form -->
+        <form action="/add_member" method="POST">
+            <h3>Add Member</h3>
+            <input type="text" name="name" placeholder="Member Name" required>
+            <input type="text" name="unique_id" placeholder="Unique ID" required>
+            <button type="submit">Add Member</button>
+        </form>
+
+        <!-- Borrow Book Form -->
+        <form action="/borrow_book" method="POST">
+            <h3>Borrow Book</h3>
+            <input type="text" name="member_id" placeholder="Member ID" required>
+            <input type="text" name="book_title" placeholder="Book Title" required>
+            <button type="submit">Borrow</button>
+        </form>
+
+        <!-- Return Book Form -->
+        <form action="/return_book" method="POST">
+            <h3>Return Book</h3>
+            <input type="text" name="member_id" placeholder="Member ID" required>
+            <input type="text" name="book_title" placeholder="Book Title" required>
+            <button type="submit">Return</button>
+        </form>
+    </div>
+</body>
+</html>
